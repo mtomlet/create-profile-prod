@@ -82,7 +82,8 @@ app.post('/create', async (req, res) => {
     if (!existingClient && phone) {
       const cleanPhone = phone.replace(/\D/g, '');
       existingClient = clients.find(c => {
-        const clientPhone = (c.mobilePhone || c.primaryPhone || '').replace(/\D/g, '');
+        // Meevo returns primaryPhoneNumber in /clients list
+        const clientPhone = (c.primaryPhoneNumber || '').replace(/\D/g, '');
         if (!clientPhone || clientPhone.length < 7) return false;  // Skip empty/short phones
         return clientPhone === cleanPhone || clientPhone.endsWith(cleanPhone) || cleanPhone.endsWith(clientPhone);
       });
@@ -115,15 +116,15 @@ app.post('/create', async (req, res) => {
       clientData.EmailAddress = email;
     }
 
-    // Add phone number in correct array format
+    // Add phone number in correct array format (camelCase required!)
     if (phone) {
       const cleanPhone = phone.replace(/\D/g, '');
-      clientData.PhoneNumbers = [{
-        Type: 21,  // Mobile phone type
-        CountryCode: "1",
-        Number: cleanPhone,
-        IsPrimary: true,
-        SmsCommOptedInState: 2087
+      clientData.phoneNumbers = [{
+        type: 21,  // Mobile phone type
+        countryCode: "1",
+        number: cleanPhone,
+        isPrimary: true,
+        smsCommOptedInState: 2087
       }];
     }
 
