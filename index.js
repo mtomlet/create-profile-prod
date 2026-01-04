@@ -104,7 +104,9 @@ app.post('/create', async (req, res) => {
       FirstName: first_name,
       LastName: last_name,
       ObjectState: 2026,  // Active
-      OnlineBookingAccess: true
+      OnlineBookingAccess: true,
+      GenderEnum: 92,  // Male (barbershop default)
+      ReferredByEnum: 1250  // Referral (via voice AI)
     };
 
     // Add email only if provided
