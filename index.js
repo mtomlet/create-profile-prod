@@ -106,8 +106,8 @@ app.post('/create', async (req, res) => {
       ObjectState: 2026,  // Active
       OnlineBookingAccess: true,
       GenderEnum: 92,  // Male (barbershop default)
-      ReferredByEnum: 1250,  // Referral
-      ReferredById: "00000000-0000-0000-0000-000000000000"  // Placeholder
+      ReferredByEnum: 1249,  // Employee
+      ReferredById: "159793cd-bf26-4574-afcd-ac08017f2cf8"  // Joshua Thorsvik (Owner)
     };
 
     // Add email only if provided
