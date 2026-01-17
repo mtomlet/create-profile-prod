@@ -111,10 +111,11 @@ app.post('/create', async (req, res) => {
       ReferredById: "98d508fe-65e9-4736-83cf-b3cc0164634a"  // AI Phone Receptionist
     };
 
-    // Add email only if provided - opt in for email communications
+    // Add email only if provided - opt in for email communications and marketing
     if (email) {
       clientData.EmailAddress = email;
       clientData.EmailCommOptedInStateEnum = 2086;  // OptedIn
+      clientData.IsMarketingEmailEnabled = true;    // Marketing emails enabled
     }
 
     // Add phone number in correct array format (camelCase required!)
@@ -125,7 +126,7 @@ app.post('/create', async (req, res) => {
         countryCode: "1",
         number: cleanPhone,
         isPrimary: true,
-        smsCommOptedInState: 2086  // OptedIn (not 2087 which is OptedOut)
+        smsCommOptedInState: 11045715  // SMS Marketing OptIn (2086 is communication only, 11045715 includes marketing)
       }];
     }
 
