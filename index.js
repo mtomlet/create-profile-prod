@@ -59,8 +59,8 @@ app.post('/create', async (req, res) => {
       });
     }
 
-    // Note: DOB and Referral are collected but NOT sent to Meevo
-    console.log('PRODUCTION: Collected (not saved to Meevo):', { date_of_birth, how_did_you_hear });
+    // Log collected data (how_did_you_hear is used for referral, DOB will be sent)
+    console.log('PRODUCTION: Collected data:', { date_of_birth, how_did_you_hear });
 
     const authToken = await getToken();
 
@@ -118,6 +118,57 @@ app.post('/create', async (req, res) => {
       clientData.IsMarketingEmailEnabled = true;    // Marketing emails enabled
     }
 
+    // Add birthday if provided - parse various formats (MM/DD/YYYY, YYYY-MM-DD, Month Day Year)
+    if (date_of_birth) {
+      let month, day, year;
+
+      // Try different date formats
+      if (date_of_birth.includes('-')) {
+        // YYYY-MM-DD format
+        const parts = date_of_birth.split('-');
+        if (parts.length === 3) {
+          year = parseInt(parts[0]);
+          month = parseInt(parts[1]);
+          day = parseInt(parts[2]);
+        }
+      } else if (date_of_birth.includes('/')) {
+        // MM/DD/YYYY format
+        const parts = date_of_birth.split('/');
+        if (parts.length === 3) {
+          month = parseInt(parts[0]);
+          day = parseInt(parts[1]);
+          year = parseInt(parts[2]);
+        }
+      } else {
+        // Try to parse natural language format like "March 15 1992"
+        const monthNames = ['january', 'february', 'march', 'april', 'may', 'june',
+                           'july', 'august', 'september', 'october', 'november', 'december'];
+        const dobLower = date_of_birth.toLowerCase();
+        for (let i = 0; i < monthNames.length; i++) {
+          if (dobLower.includes(monthNames[i])) {
+            month = i + 1;
+            // Extract day and year numbers
+            const numbers = date_of_birth.match(/\d+/g);
+            if (numbers && numbers.length >= 2) {
+              day = parseInt(numbers[0]);
+              year = parseInt(numbers[1]);
+            }
+            break;
+          }
+        }
+      }
+
+      // Validate and add birthday fields
+      if (month && day && year && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        clientData.BirthMonth = month;
+        clientData.BirthDay = day;
+        clientData.BirthYear = year;
+        console.log('PRODUCTION: Birthday parsed:', { month, day, year });
+      } else {
+        console.log('PRODUCTION: Could not parse birthday:', date_of_birth);
+      }
+    }
+
     // Add phone number in correct array format (camelCase required!)
     if (phone) {
       const cleanPhone = phone.replace(/\D/g, '');
@@ -126,7 +177,8 @@ app.post('/create', async (req, res) => {
         countryCode: "1",
         number: cleanPhone,
         isPrimary: true,
-        smsCommOptedInState: 11045715  // SMS Marketing OptIn (2086 is communication only, 11045715 includes marketing)
+        smsCommOptedInState: 2086  // SMS Communication OptIn - enables "Opt in for text notifications"
+        // Note: 11045715 was causing "DEACTIVATED" status for text notifications
       }];
     }
 
